@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>springboot with Toast UI</title>
+</head>
+<link rel="stylesheet" href="https://uicdn.toast.com/tui-grid/latest/tui-grid.css" />
+<script src="https://uicdn.toast.com/tui-grid/latest/tui-grid.js"></script>
+<body onload="load()">
+
+<h3>springboot with Toast UI</h3>
+
+<div id="grid"></div>
+</body>
+
+<script>
+    function load() {
+        var Grid = tui.Grid;
+
+        const gridData = [
+            {
+                id: '11',
+                name: 'name---',
+                content: 'content---'
+            },
+            {
+                id: '11',
+                name: 'name---',
+                content: 'content---'
+            },
+
+        ];
+
+        const grid = new Grid({
+            el: document.getElementById('grid'),
+            data: gridData,
+            scrollX: false,
+            scrollY: false,
+            columns: [
+                {
+                    header: '아이디',
+                    name: 'id'
+                },
+                {
+                    header: '이름',
+                    name: 'name'
+                },
+                {
+                    header: '내용',
+                    name: 'content'
+                }
+            ]
+        });
+    }
+
+</script>
+</html>
