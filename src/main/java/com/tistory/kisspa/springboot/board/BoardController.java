@@ -18,11 +18,13 @@ public class BoardController {
 
     @RequestMapping(value = "findBoardList.do")
     public @ResponseBody List findBoardList(@RequestBody Map param) {
+        System.out.println(param);
         return boardService.findBoardList();
     }
 
     @RequestMapping(value = "test.do")
     public @ResponseBody List test() {
+        System.out.println("test.do");
         return boardService.findBoardList();
     }
 }

@@ -6,34 +6,52 @@
 </head>
 <link rel="stylesheet" href="https://uicdn.toast.com/tui-grid/latest/tui-grid.css" />
 <script src="https://uicdn.toast.com/tui-grid/latest/tui-grid.js"></script>
-<body onload="load()">
+<body>
 
 <h3>springboot with Toast UI</h3>
+
+<input type="button" value="데이터 가져오기" onclick="getData()"/>
 
 <div id="grid"></div>
 </body>
 
 <script>
-    function load() {
-        var Grid = tui.Grid;
+    window.onload = init();
 
-        const gridData = [
-            {
-                id: '11',
-                name: 'name---',
-                content: 'content---'
-            },
-            {
-                id: '11',
-                name: 'name---',
-                content: 'content---'
-            },
+    var dataSource;
+    var grid;
 
-        ];
+    function getData() {
+        let param = new Object();
+        param.id = '1';
 
-        const grid = new Grid({
+        const url = "/board/findBoardList.do";
+        fetch(url, {
+            method:'POST',
+            body: JSON.stringify(param),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }).then((res) => {
+            // Promise 반환
+            return res.json();
+        }).then((json) => {
+            // 서버 리턴값
+            dataSource = json;
+            createGrid();
+        })
+    }
+    function init() {
+        dataSource = [{id:'1', name:'이름', content:'내용0923840wroiweuroiwuer9823ur0293ur0weiruweoiu'}];
+        console.log(dataSource);
+        //createGrid();
+    }
+
+    function createGrid() {
+
+        grid = new tui.Grid({
             el: document.getElementById('grid'),
-            data: gridData,
+            data: dataSource,
             scrollX: false,
             scrollY: false,
             columns: [
@@ -52,6 +70,5 @@
             ]
         });
     }
-
 </script>
 </html>
