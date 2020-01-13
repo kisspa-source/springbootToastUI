@@ -4,14 +4,16 @@
 
 <mapper namespace="board">
     <resultMap id="findBoardList" type="java.util.HashMap">
-        <result property="content" column="content" jdbcType="CLOB" javaType="string"/>
+        <result property="CONTENTS" column="CONTENTS" jdbcType="CLOB" javaType="string"/>
     </resultMap>
 
     <select id="findBoardList" resultMap="findBoardList">
         SELECT
-          ID
-          , CONTENT
-          , NAME
+          BOARD_ID
+          , TITLE
+          , WRITER
+          , CONTENTS
+          , REG_DT
         FROM BOARD
     </select>
 

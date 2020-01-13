@@ -1,25 +1,84 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <title>SpringBoot, oracle, mybatis and Toast UI</title>
     <meta charset="UTF-8">
-    <title>springboot with Toast UI</title>
+    <!--  반응형 웹디자인을 위한 코드-->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- 부트스트랩 CDN-->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+    <!-- Toast UI CDN-->
+    <link rel="stylesheet" href="https://uicdn.toast.com/tui-grid/latest/tui-grid.css" />
+    <style>
+        p { margin:15px 0px; }
+        .h-div {height:96%; border:1px #000000 solid}
+    </style>
 </head>
-<link rel="stylesheet" href="https://uicdn.toast.com/tui-grid/latest/tui-grid.css" />
-<script src="https://uicdn.toast.com/tui-grid/latest/tui-grid.js"></script>
 <body>
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <p>SpringBoot, oracle, mybatis and Toast UI</p>
+            <ul class="nav nav-tabs">
+                <li class="nav-item">
+                    <a class="nav-link active" data-toggle="tab" href="#gridTab">Grid</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-toggle="tab" href="#asd">ASD</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-toggle="tab" href="#zxc">ZXC</a>
+                </li>
+            </ul>
+            <div class="tab-content">
+                <div class="tab-pane fade show active" id="gridTab">
 
-<h3>springboot with Toast UI</h3>
+                    <!-- 검색조건 -->
+                    <form class="form-inline">
+                        <div class="form-group mb-2">
+                            <label class="col-sm-2 col-form-label" for="inputTitle">Title</label>
+                            <input type="text" class="form-control form-control-sm" id="inputTitle" placeholder="Enter Title">
+                        </div>
+                        <div class="form-group mb-2">
+                            <button type="button" class="btn btn-primary btn-sm" onclick="getData()">데이터 가져오기</button>
+                        </div>
+                    </form>
+                    </form>
+                    <!-- 데이터 그리드 -->
+                    <div id="grid" class="h-div"></div>
+                </div>
+                <div class="tab-pane fade" id="asd">
+                    <p>Nunc vitae turpis id nibh sodales commodo et non augue. Proin fringilla ex nunc. Integer tincidunt risus ut facilisis tristique.</p>
+                </div>
+                <div class="tab-pane fade" id="zxc">
+                    <p>Curabitur dignissim quis nunc vitae laoreet. Etiam ut mattis leo, vel fermentum tellus. Sed sagittis rhoncus venenatis. Quisque commodo consectetur faucibus. Aenean eget ultricies justo.</p>
+                </div>
+            </div>
 
-<input type="button" value="데이터 가져오기" onclick="getData()"/>
 
-<div id="grid"></div>
-</body>
 
+
+
+        </div>
+    </div>
+</div>
+
+<script src="https://uicdn.toast.com/tui-grid/latest/tui-grid.js"></script>
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
 <script>
     window.onload = init();
-
-    var dataSource;
+    window.addEventListener('resize', resize);
     var grid;
+
+    function resize() {
+        console.log('resize', window.innerWidth, window.innerHeight);
+
+        grid.setBodyHeight(window.innerHeight-200);
+        //grid.refreshLayout();
+
+    }
 
     function getData() {
         let param = new Object();
@@ -37,38 +96,55 @@
             return res.json();
         }).then((json) => {
             // 서버 리턴값
-            dataSource = json;
-            createGrid();
+            grid.resetData(json);
         })
     }
     function init() {
-        dataSource = [{id:'1', name:'이름', content:'내용0923840wroiweuroiwuer9823ur0293ur0weiruweoiu'}];
+        dataSource = [];
         console.log(dataSource);
-        //createGrid();
+
+        createGrid();
     }
 
     function createGrid() {
-
         grid = new tui.Grid({
             el: document.getElementById('grid'),
-            data: dataSource,
-            scrollX: false,
-            scrollY: false,
+            //data: dataSource,
+            scrollX: true,
+            scrollY: true,
+            rowHeaders: ['rowNum'],
+            bodyHeight: window.innerHeight-200,
             columns: [
                 {
-                    header: '아이디',
-                    name: 'id'
+                    header: 'Title',
+                    name: 'TITLE',
+                    sortable: true,
+                    width: 300
                 },
                 {
                     header: '이름',
-                    name: 'name'
+                    name: 'WRITER',
+                    sortable: true,
+                    width: 120
                 },
                 {
                     header: '내용',
-                    name: 'content'
+                    name: 'CONTENTS'
+                },
+                {
+                    header: '작성일',
+                    name: 'REG_DT',
+                    sortable: true,
+                    width: 120
                 }
-            ]
+            ],
+            columnOptions: {
+                resizable: true
+            }
         });
     }
 </script>
+</body>
+
+
 </html>

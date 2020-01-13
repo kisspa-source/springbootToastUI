@@ -1,0 +1,8 @@
+GET https://www.nlotto.co.kr/common.do?method=getLottoNumber&drwNo=890
+Accept: */*
+Cache-Control: no-cache
+
+<> 2020-01-13T033423.200.html
+
+###
+
