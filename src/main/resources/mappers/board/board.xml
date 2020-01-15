@@ -8,13 +8,29 @@
     </resultMap>
 
     <select id="findBoardList" resultMap="findBoardList">
+    /* findBoardList */
         SELECT
           BOARD_ID
           , TITLE
           , WRITER
           , CONTENTS
-          , REG_DT
+          , TO_CHAR(REG_DT, 'YYYY/MM/DD HH24:MI:SS') AS REG_DT
         FROM BOARD
+        <where>
+            TITLE LIKE '%'||'${title}'||'%'
+        </where>
+    </select>
+
+    <select id="findBoard" resultMap="Map">
+    /* findBoard */
+        SELECT
+          BOARD_ID
+          , TITLE
+          , WRITER
+          , CONTNETS
+          , TO_CHAR(REG_DT, 'YYYY/MM/DD HH24:MI:SS') AS REG_DT
+        FROM BOARD
+        WHERE BOARD_ID = ${board_id}
     </select>
 
 </mapper>

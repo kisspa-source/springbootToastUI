@@ -1,5 +1,7 @@
 package com.tistory.kisspa.springboot.board;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,15 +18,22 @@ public class BoardController {
     @Inject
     private BoardService boardService;
 
-    @RequestMapping(value = "findBoardList.do")
-    public @ResponseBody List findBoardList(@RequestBody Map param) {
-        System.out.println(param);
-        return boardService.findBoardList();
-    }
+    final private Logger LOG = LoggerFactory.getLogger(this.getClass());
 
     @RequestMapping(value = "test.do")
     public @ResponseBody List test() {
         System.out.println("test.do");
-        return boardService.findBoardList();
+        return boardService.findBoardList(null);
+    }
+
+    @RequestMapping(value = "findBoardList.do")
+    public @ResponseBody List findBoardList(@RequestBody Map param) {
+        LOG.info("param"+ param);
+        return boardService.findBoardList(param);
+    }
+
+    @RequestMapping(value = "findBoard.do")
+    public @ResponseBody Map<String, Object> findBoard(@RequestBody Map param) {
+        return boardService.findBoard(param);
     }
 }

@@ -31,33 +31,77 @@
                 </li>
             </ul>
             <div class="tab-content">
-                <div class="tab-pane fade show active" id="gridTab">
 
+                <div class="tab-pane fade show active" id="gridTab">
                     <!-- 검색조건 -->
-                    <form class="form-inline">
+                    <div class="form-inline">
                         <div class="form-group mb-2">
-                            <label class="col-sm-2 col-form-label" for="inputTitle">Title</label>
-                            <input type="text" class="form-control form-control-sm" id="inputTitle" placeholder="Enter Title">
+                            <label class="col-sm-2 col-form-label" for="searchTitle">
+                                Title
+                            </label>
+                            <input type="text" class="form-control form-control-sm" id="searchTitle"
+                                   placeholder="Enter Title">
                         </div>
                         <div class="form-group mb-2">
-                            <button type="button" class="btn btn-primary btn-sm" onclick="getData()">데이터 가져오기</button>
+                            <button type="button" class="btn btn-outline-success my-2 my-sm-0" id="searchBtn">
+                                Search
+                            </button>
                         </div>
-                    </form>
-                    </form>
+                    </div>
+                    <div align="right">
+                        <button type="button" class="btn btn-primary btn-sm" data-toggle="collapse"
+                                data-target="#collapseDetail"
+                                aria-expanded="false"
+                                aria-controls="collapseDetail">
+                            Create
+                        </button>
+                    </div>
+
+                    <!-- 상세화면 -->
+                    <div class="collapse" id="collapseDetail">
+                        <div>
+                            <div class="form-group">
+                                <label for="inputTitle">Title</label>
+                                <input type="text" class="form-control" id="inputTitle" placeholder="Enter Title">
+                            </div>
+                            <div class="form-group">
+                                <label for="inputName">Name</label>
+                                <input type="text" class="form-control" id="inputName" placeholder="Enter Name">
+                            </div>
+                            <div class="form-group">
+                                <label for="inputContents">Contents</label>
+                                <textarea class="form-control" id="inputContents" rows="3"></textarea>
+                            </div>
+                            <div align="center" style="margin: 5px 0px">
+                                <button type="button" class="btn btn-primary" id="submitBtn">
+                                    Submit
+                                </button>
+                                <button type="button" class="btn btn-primary"
+                                        data-toggle="collapse"
+                                        data-target="#collapseDetail"
+                                        aria-expanded="true"
+                                        aria-controls="collapseDetail">
+                                    Cancel
+                                </button>
+
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- 데이터 그리드 -->
                     <div id="grid" class="h-div"></div>
+
                 </div>
+
                 <div class="tab-pane fade" id="asd">
                     <p>Nunc vitae turpis id nibh sodales commodo et non augue. Proin fringilla ex nunc. Integer tincidunt risus ut facilisis tristique.</p>
                 </div>
+
                 <div class="tab-pane fade" id="zxc">
                     <p>Curabitur dignissim quis nunc vitae laoreet. Etiam ut mattis leo, vel fermentum tellus. Sed sagittis rhoncus venenatis. Quisque commodo consectetur faucibus. Aenean eget ultricies justo.</p>
                 </div>
+
             </div>
-
-
-
-
 
         </div>
     </div>
@@ -68,21 +112,45 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
 <script>
+    var grid;
     window.onload = init();
     window.addEventListener('resize', resize);
-    var grid;
+
+    const searchTitle = document.getElementById('searchTitle');
+    const searchBtn = document.getElementById('searchBtn');
+    const submitBtn = document.getElementById('submitBtn');
+    searchTitle.addEventListener('keydown', () => {
+        if( event.key == 'Enter') getData();
+    });
+    searchBtn.addEventListener('click', () => {
+       getData();
+    });
+    submitBtn.addEventListener('click', () => {
+       setData();
+    });
 
     function resize() {
         console.log('resize', window.innerWidth, window.innerHeight);
-
-        grid.setBodyHeight(window.innerHeight-200);
+        console.log(document.getElementById('grid').offsetTop);
+        grid.setBodyHeight(window.innerHeight-250);
         //grid.refreshLayout();
+
+    }
+
+    function setData(board_id) {
+        let param = new Object();
+        param.board_id = board_id;
+        console.log(param);
+        const url = '/board/'
 
     }
 
     function getData() {
         let param = new Object();
-        param.id = '1';
+        const searchTitle = document.getElementById('searchTitle');
+        param.title = searchTitle.value;
+
+        console.log(param);
 
         const url = "/board/findBoardList.do";
         fetch(url, {
@@ -96,13 +164,11 @@
             return res.json();
         }).then((json) => {
             // 서버 리턴값
+
             grid.resetData(json);
         })
     }
     function init() {
-        dataSource = [];
-        console.log(dataSource);
-
         createGrid();
     }
 
@@ -113,7 +179,7 @@
             scrollX: true,
             scrollY: true,
             rowHeaders: ['rowNum'],
-            bodyHeight: window.innerHeight-200,
+            bodyHeight: window.innerHeight-250,
             columns: [
                 {
                     header: 'Title',
@@ -122,25 +188,29 @@
                     width: 300
                 },
                 {
-                    header: '이름',
+                    header: 'Writer',
                     name: 'WRITER',
                     sortable: true,
                     width: 120
                 },
                 {
-                    header: '내용',
+                    header: 'Contents',
                     name: 'CONTENTS'
                 },
                 {
-                    header: '작성일',
+                    header: 'RegDate',
                     name: 'REG_DT',
                     sortable: true,
-                    width: 120
+                    width: 140
                 }
             ],
             columnOptions: {
                 resizable: true
             }
+        });
+        grid.on('click', (event) => {
+            console.log(event.rowKey, event.columnName);
+            setData(event.rowKey);
         });
     }
 </script>
