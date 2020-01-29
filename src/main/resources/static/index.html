@@ -49,10 +49,7 @@
                         </div>
                     </div>
                     <div align="right">
-                        <button type="button" class="btn btn-primary btn-sm" data-toggle="collapse"
-                                data-target="#collapseDetail"
-                                aria-expanded="false"
-                                aria-controls="collapseDetail">
+                        <button type="button" class="btn btn-primary btn-sm" id="createBtn">
                             Create
                         </button>
                     </div>
@@ -70,7 +67,7 @@
                             </div>
                             <div class="form-group">
                                 <label for="inputContents">Contents</label>
-                                <textarea class="form-control" id="inputContents" rows="3"></textarea>
+                                <textarea class="form-control" id="inputContents" rows="3" placeholder="Enter Contents"></textarea>
                             </div>
                             <div align="center" style="margin: 5px 0px">
                                 <button type="button" class="btn btn-primary" id="submitBtn">
@@ -119,33 +116,88 @@
     const searchTitle = document.getElementById('searchTitle');
     const searchBtn = document.getElementById('searchBtn');
     const submitBtn = document.getElementById('submitBtn');
+    const createBtn = document.getElementById('createBtn');
+
     searchTitle.addEventListener('keydown', () => {
-        if( event.key == 'Enter') getData();
+        if( event.key == 'Enter') getDataList();
     });
     searchBtn.addEventListener('click', () => {
-       getData();
-    });
-    submitBtn.addEventListener('click', () => {
-       setData();
+       getDataList();
+       $('#collapseDetail').collapse('hide');
     });
 
+    submitBtn.addEventListener('click', () => {
+        submitData();
+
+
+    });
+
+    createBtn.addEventListener('click', () => {
+        setDetailData(new Object());
+        $('#collapseDetail').collapse('show');
+        console.log('createBtn click!!!')
+    })
     function resize() {
         console.log('resize', window.innerWidth, window.innerHeight);
         console.log(document.getElementById('grid').offsetTop);
         grid.setBodyHeight(window.innerHeight-250);
-        //grid.refreshLayout();
-
     }
 
-    function setData(board_id) {
+    function viewDetail(board_id) {
         let param = new Object();
         param.board_id = board_id;
         console.log(param);
-        const url = '/board/'
+        const url = '/board/findBoard.do';
+        fetch(url, {
+            method:'POST',
+            body: JSON.stringify(param),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }).then((res) => {
+            // Promiss 리턴
+            return res.json();
+        }).then((json) => {
+            // 서버 리턴값
+            setDetailData(json);
+        })
+    }
+
+    function submitData() {
+        let param = new Object();
+        param.title = $('#inputTitle').val();
+        param.writer = $('#inputName').val();
+        param.contents = $('#inputContents').val();
+
+        const url = '/board/createBoard.do';
+        fetch(url, {
+            method:'POST',
+            body: JSON.stringify(param),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }).then((res) => {
+            // Promiss 리턴
+            return res.json();
+        }).then((json) => {
+            // 서버 리턴값
+            console.log(json);
+        })
+
 
     }
 
-    function getData() {
+    function setDetailData(json) {
+
+        let data = json;
+        $('#inputTitle').val(data.TITLE);
+        $('#inputName').val(data.WRITER);
+        $('#inputContents').val(data.CONTENTS);
+
+        $('#collapseDetail').collapse('show');
+    }
+
+    function getDataList() {
         let param = new Object();
         const searchTitle = document.getElementById('searchTitle');
         param.title = searchTitle.value;
@@ -209,8 +261,8 @@
             }
         });
         grid.on('click', (event) => {
-            console.log(event.rowKey, event.columnName);
-            setData(event.rowKey);
+            const rowKey = event.rowKey;
+            viewDetail(grid.getRow(rowKey).BOARD_ID);
         });
     }
 </script>

@@ -3,11 +3,12 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="board">
-    <resultMap id="findBoardList" type="java.util.HashMap">
+
+    <resultMap id="findBoardMap" type="java.util.HashMap">
         <result property="CONTENTS" column="CONTENTS" jdbcType="CLOB" javaType="string"/>
     </resultMap>
 
-    <select id="findBoardList" resultMap="findBoardList">
+    <select id="findBoardList" resultMap="findBoardMap">
     /* findBoardList */
         SELECT
           BOARD_ID
@@ -21,16 +22,33 @@
         </where>
     </select>
 
-    <select id="findBoard" resultMap="Map">
+    <select id="findBoard" resultMap="findBoardMap">
     /* findBoard */
         SELECT
           BOARD_ID
           , TITLE
           , WRITER
-          , CONTNETS
+          , CONTENTS
           , TO_CHAR(REG_DT, 'YYYY/MM/DD HH24:MI:SS') AS REG_DT
         FROM BOARD
-        WHERE BOARD_ID = ${board_id}
+        WHERE BOARD_ID = #{board_id}
     </select>
+
+    <insert id="createBoard">
+        <selectKey resultType="int" keyProperty="board_id" order="BEFORE">
+            SELECT MAX(BOARD_ID)+1 FROM BOARD
+        </selectKey>
+        /*createBoard*/
+        INSERT INTO BOARD
+        (BOARD_ID, TITLE, WRITER, CONTENTS, REG_DT)
+        VALUES
+        (
+        #{board_id}
+        , #{title}
+        , #{writer}
+        , #{contents}
+        , sysdate
+        )
+    </insert>
 
 </mapper>

@@ -36,4 +36,10 @@ public class BoardController {
     public @ResponseBody Map<String, Object> findBoard(@RequestBody Map param) {
         return boardService.findBoard(param);
     }
+
+    @RequestMapping(value = "createBoard.do")
+    public @ResponseBody void createBoard(@RequestBody Map param) {
+        LOG.info("param : "+param);
+        boardService.createBoard(param);
+    }
 }

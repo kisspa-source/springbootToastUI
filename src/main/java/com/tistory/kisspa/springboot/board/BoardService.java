@@ -21,7 +21,11 @@ public class BoardService {
         return sqlSession.selectList(namespace+"findBoardList", param);
     }
 
-    public Map<String, Object> findBoard(Map param) {
+    public Map<String, Object> findBoard(Map<String, Object> param) {
         return sqlSession.selectOne(namespace+"findBoard", param);
+    }
+
+    public void createBoard(Map param) {
+        sqlSession.insert(namespace+"createBoard", param);
     }
 }
