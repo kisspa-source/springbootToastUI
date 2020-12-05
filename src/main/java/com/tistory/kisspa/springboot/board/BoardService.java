@@ -25,7 +25,11 @@ public class BoardService {
         return sqlSession.selectOne(namespace+"findBoard", param);
     }
 
-    public void createBoard(Map param) {
-        sqlSession.insert(namespace+"createBoard", param);
+    public void insertModifyBoard(Map param) {
+        if (null != param.get("boardId") && !"".equals(param.get("boardId"))) {
+            sqlSession.update(namespace+"updateBoard", param);
+        } else {
+            sqlSession.insert(namespace+"insertBoard", param);
+        }
     }
 }

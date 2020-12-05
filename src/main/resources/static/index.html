@@ -1,14 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>SpringBoot, oracle, mybatis and Toast UI</title>
+    <title>SpringBoot, sqlite, mybatis and Toast UI</title>
     <meta charset="UTF-8">
     <!--  반응형 웹디자인을 위한 코드-->
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- 부트스트랩 CDN-->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
-    <!-- Toast UI CDN-->
+    <!-- Toast GRID UI CDN-->
     <link rel="stylesheet" href="https://uicdn.toast.com/tui-grid/latest/tui-grid.css" />
+    <!-- Editor's Dependecy Style -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.48.4/codemirror.min.css"/>
+    <!-- Editor's Style -->
+    <link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css" />
     <style>
         p { margin:15px 0px; }
         .h-div {height:96%; border:1px #000000 solid}
@@ -18,7 +22,7 @@
 <div class="container">
     <div class="row">
         <div class="col">
-            <p>SpringBoot, oracle, mybatis and Toast UI</p>
+            <p>SpringBoot, sqlite, mybatis and Toast UI</p>
             <ul class="nav nav-tabs">
                 <li class="nav-item">
                     <a class="nav-link active" data-toggle="tab" href="#gridTab">Grid</a>
@@ -36,11 +40,8 @@
                     <!-- 검색조건 -->
                     <div class="form-inline">
                         <div class="form-group mb-2">
-                            <label class="col-sm-2 col-form-label" for="searchTitle">
-                                Title
-                            </label>
-                            <input type="text" class="form-control form-control-sm" id="searchTitle"
-                                   placeholder="Enter Title">
+                            <input type="text" class="form-control form-control-sm" id="searchText"
+                                   placeholder="Search Text">
                         </div>
                         <div class="form-group mb-2">
                             <button type="button" class="btn btn-outline-success my-2 my-sm-0" id="searchBtn">
@@ -48,6 +49,7 @@
                             </button>
                         </div>
                     </div>
+                    <!-- 생성버튼 -->
                     <div align="right">
                         <button type="button" class="btn btn-primary btn-sm" id="createBtn">
                             Create
@@ -58,6 +60,7 @@
                     <div class="collapse" id="collapseDetail">
                         <div>
                             <div class="form-group">
+                                <input type="hidden" id="boardId">
                                 <label for="inputTitle">Title</label>
                                 <input type="text" class="form-control" id="inputTitle" placeholder="Enter Title">
                             </div>
@@ -66,8 +69,10 @@
                                 <input type="text" class="form-control" id="inputName" placeholder="Enter Name">
                             </div>
                             <div class="form-group">
-                                <label for="inputContents">Contents</label>
-                                <textarea class="form-control" id="inputContents" rows="3" placeholder="Enter Contents"></textarea>
+                                <!--<label for="inputContents">Contents</label>-->
+                                <div id="editor">
+                                    <!--<textarea class="form-control" id="inputContents" rows="3" placeholder="Enter Contents"></textarea>-->
+                                </div>
                             </div>
                             <div align="center" style="margin: 5px 0px">
                                 <button type="button" class="btn btn-primary" id="submitBtn">
@@ -85,7 +90,7 @@
                         </div>
                     </div>
 
-                    <!-- 데이터 그리드 -->
+                    <!-- 목록 데이터 그리드 -->
                     <div id="grid" class="h-div"></div>
 
                 </div>
@@ -105,37 +110,35 @@
 </div>
 
 <script src="https://uicdn.toast.com/tui-grid/latest/tui-grid.js"></script>
+<script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
 <script>
-    var grid;
+    let grid;
+    let editor;
     window.onload = init();
     window.addEventListener('resize', resize);
 
-    const searchTitle = document.getElementById('searchTitle');
+    const searchText = document.getElementById('searchText');
     const searchBtn = document.getElementById('searchBtn');
     const submitBtn = document.getElementById('submitBtn');
     const createBtn = document.getElementById('createBtn');
 
-    searchTitle.addEventListener('keydown', () => {
-        if( event.key == 'Enter') getDataList();
+    searchText.addEventListener('keydown', () => {
+        if(event.key === 'Enter') getDataList();
     });
     searchBtn.addEventListener('click', () => {
        getDataList();
-       $('#collapseDetail').collapse('hide');
     });
 
     submitBtn.addEventListener('click', () => {
         submitData();
-
-
     });
 
     createBtn.addEventListener('click', () => {
         setDetailData(new Object());
         $('#collapseDetail').collapse('show');
-        console.log('createBtn click!!!')
     })
     function resize() {
         console.log('resize', window.innerWidth, window.innerHeight);
@@ -144,10 +147,9 @@
     }
 
     function viewDetail(board_id) {
+        const url = '/board/findBoard.do';
         let param = new Object();
         param.board_id = board_id;
-        console.log(param);
-        const url = '/board/findBoard.do';
         fetch(url, {
             method:'POST',
             body: JSON.stringify(param),
@@ -164,12 +166,13 @@
     }
 
     function submitData() {
+        const url = '/board/insertModifyBoard.do';
         let param = new Object();
+        param.boardId = $('#boardId').val();
         param.title = $('#inputTitle').val();
         param.writer = $('#inputName').val();
-        param.contents = $('#inputContents').val();
 
-        const url = '/board/createBoard.do';
+        param.contents = editor.getHtml();
         fetch(url, {
             method:'POST',
             body: JSON.stringify(param),
@@ -177,32 +180,26 @@
                 'Content-Type': 'application/json'
             }
         }).then((res) => {
-            // Promiss 리턴
-            return res.json();
-        }).then((json) => {
-            // 서버 리턴값
-            console.log(json);
+            if (res.ok) {
+                getDataList();
+            }
         })
-
-
     }
 
     function setDetailData(json) {
 
         let data = json;
+        $('#boardId').val(data.BOARD_ID);
         $('#inputTitle').val(data.TITLE);
         $('#inputName').val(data.WRITER);
-        $('#inputContents').val(data.CONTENTS);
+        editor.setHtml(data.CONTENTS);
 
         $('#collapseDetail').collapse('show');
     }
 
     function getDataList() {
         let param = new Object();
-        const searchTitle = document.getElementById('searchTitle');
-        param.title = searchTitle.value;
-
-        console.log(param);
+        param.searchText = $('#searchText').val();
 
         const url = "/board/findBoardList.do";
         fetch(url, {
@@ -216,38 +213,50 @@
             return res.json();
         }).then((json) => {
             // 서버 리턴값
-
             grid.resetData(json);
         })
+
+        $('#collapseDetail').collapse('hide');
     }
+
     function init() {
         createGrid();
+        createEditor();
+    }
+
+    function createEditor() {
+        editor = new toastui.Editor({
+            el: document.getElementById('editor'),
+            height: '350px',
+            //initialValue: '',
+            initialEditType: 'wysiwyg'
+        });
     }
 
     function createGrid() {
         grid = new tui.Grid({
             el: document.getElementById('grid'),
-            //data: dataSource,
             scrollX: true,
             scrollY: true,
-            rowHeaders: ['rowNum'],
+            rowHeaders: ['checkbox'],
             bodyHeight: window.innerHeight-250,
             columns: [
                 {
+                    header: 'Num',
+                    name: 'BOARD_ID',
+                    sortable: true,
+                    width: 80
+                },
+                {
                     header: 'Title',
                     name: 'TITLE',
-                    sortable: true,
-                    width: 300
+                    sortable: true
                 },
                 {
                     header: 'Writer',
                     name: 'WRITER',
                     sortable: true,
                     width: 120
-                },
-                {
-                    header: 'Contents',
-                    name: 'CONTENTS'
                 },
                 {
                     header: 'RegDate',
@@ -262,11 +271,12 @@
         });
         grid.on('click', (event) => {
             const rowKey = event.rowKey;
-            viewDetail(grid.getRow(rowKey).BOARD_ID);
+            if (event.columnName === 'TITLE') {
+                viewDetail(grid.getRow(rowKey).BOARD_ID);
+            }
+
         });
     }
 </script>
 </body>
-
-
 </html>

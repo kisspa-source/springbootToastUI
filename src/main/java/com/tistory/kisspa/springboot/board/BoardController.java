@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.inject.Inject;
@@ -37,9 +38,9 @@ public class BoardController {
         return boardService.findBoard(param);
     }
 
-    @RequestMapping(value = "createBoard.do")
-    public @ResponseBody void createBoard(@RequestBody Map param) {
+    @RequestMapping(value = "insertModifyBoard.do")
+    public @ResponseBody void insertModifyBoard(@RequestBody Map param) {
         LOG.info("param : "+param);
-        boardService.createBoard(param);
+        boardService.insertModifyBoard(param);
     }
 }

@@ -14,12 +14,18 @@
           BOARD_ID
           , TITLE
           , WRITER
-          , CONTENTS
-          , TO_CHAR(REG_DT, 'YYYY/MM/DD HH24:MI:SS') AS REG_DT
+          , REG_DT
         FROM BOARD
         <where>
-            TITLE LIKE '%'||'${title}'||'%'
+            <if test="searchText != null and searchText != ''">
+                TITLE LIKE '%'||'${searchText}'||'%'
+                OR
+                CONTENTS LIKE '%'||'${searchText}'||'%'
+                OR
+                WRITER LIKE '%'||'${searchText}'||'%'
+            </if>
         </where>
+        ORDER BY REG_DT DESC
     </select>
 
     <select id="findBoard" resultMap="findBoardMap">
@@ -29,13 +35,13 @@
           , TITLE
           , WRITER
           , CONTENTS
-          , TO_CHAR(REG_DT, 'YYYY/MM/DD HH24:MI:SS') AS REG_DT
+          , REG_DT
         FROM BOARD
         WHERE BOARD_ID = #{board_id}
     </select>
 
-    <insert id="createBoard">
-        <selectKey resultType="int" keyProperty="board_id" order="BEFORE">
+    <insert id="insertBoard">
+        <selectKey resultType="int" keyProperty="boardId" order="BEFORE">
             SELECT MAX(BOARD_ID)+1 FROM BOARD
         </selectKey>
         /*createBoard*/
@@ -43,12 +49,17 @@
         (BOARD_ID, TITLE, WRITER, CONTENTS, REG_DT)
         VALUES
         (
-        #{board_id}
+        #{boardId}
         , #{title}
         , #{writer}
         , #{contents}
-        , sysdate
+        , datetime('now','localtime')
         )
     </insert>
+
+    <update id="updateBoard">
+        UPDATE BOARD SET TITLE = #{title}, WRITER = #{writer}, CONTENTS = #{contents}
+        WHERE BOARD_ID = #{boardId}
+    </update>
 
 </mapper>
