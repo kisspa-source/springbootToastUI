@@ -62,4 +62,12 @@
         WHERE BOARD_ID = #{boardId}
     </update>
 
+    <delete id="deleteBoard">
+        DELETE FROM BOARD WHERE BOARD_ID IN
+        <foreach collection="deleteItem" item="item" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+    </delete>
+
+
 </mapper>

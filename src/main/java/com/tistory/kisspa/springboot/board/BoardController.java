@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.inject.Inject;
@@ -43,4 +42,7 @@ public class BoardController {
         LOG.info("param : "+param);
         boardService.insertModifyBoard(param);
     }
+
+    @RequestMapping(value = "deleteBoard.do")
+    public @ResponseBody void deleteBoard(@RequestBody Map param) { boardService.deleteBoard(param);}
 }

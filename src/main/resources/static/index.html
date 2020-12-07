@@ -48,12 +48,21 @@
                                 Search
                             </button>
                         </div>
+
                     </div>
-                    <!-- 생성버튼 -->
-                    <div align="right">
-                        <button type="button" class="btn btn-primary btn-sm" id="createBtn">
-                            Create
-                        </button>
+                    <div class="form-inline" align="right">
+                        <!-- 생성버튼 -->
+                        <div align="right">
+                            <button type="button" class="btn btn-primary btn-sm" id="createBtn">
+                                Create
+                            </button>
+                        </div>
+                        <!-- 삭제버튼 -->
+                        <div align="right">
+                            <button type="button" class="btn btn-primary btn-sm" id="deleteBtn">
+                                Delete
+                            </button>
+                        </div>
                     </div>
 
                     <!-- 상세화면 -->
@@ -124,6 +133,7 @@
     const searchBtn = document.getElementById('searchBtn');
     const submitBtn = document.getElementById('submitBtn');
     const createBtn = document.getElementById('createBtn');
+    const deleteBtn = document.getElementById('deleteBtn');
 
     searchText.addEventListener('keydown', () => {
         if(event.key === 'Enter') getDataList();
@@ -139,7 +149,11 @@
     createBtn.addEventListener('click', () => {
         setDetailData(new Object());
         $('#collapseDetail').collapse('show');
-    })
+    });
+
+    deleteBtn.addEventListener('click', () => {
+        deleteData(new Object());
+    });
     function resize() {
         console.log('resize', window.innerWidth, window.innerHeight);
         console.log(document.getElementById('grid').offsetTop);
@@ -184,6 +198,33 @@
                 getDataList();
             }
         })
+    }
+
+    function deleteData() {
+        const url = '/board/deleteBoard.do';
+        let param = new Object();
+        let deleteArray = new Array();
+
+        grid.getCheckedRows().forEach(element => console.log(deleteArray.push(element.BOARD_ID)));
+
+        if (deleteArray.length <= 0) {
+            return;
+        }
+
+        param.deleteItem = deleteArray;
+
+        fetch(url, {
+            method:'POST',
+            body: JSON.stringify(param),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }).then((res) => {
+            if (res.ok) {
+                getDataList();
+            }
+        })
+
     }
 
     function setDetailData(json) {
@@ -250,7 +291,12 @@
                 {
                     header: 'Title',
                     name: 'TITLE',
-                    sortable: true
+                    sortable: true,
+                    formatter: function(value) {
+                        console.log(value);
+
+                        return '<div style="color: blue; cursor:pointer">'+value.value+'</div>';
+                    }
                 },
                 {
                     header: 'Writer',
@@ -274,7 +320,6 @@
             if (event.columnName === 'TITLE') {
                 viewDetail(grid.getRow(rowKey).BOARD_ID);
             }
-
         });
     }
 </script>

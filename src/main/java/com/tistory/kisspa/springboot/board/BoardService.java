@@ -32,4 +32,9 @@ public class BoardService {
             sqlSession.insert(namespace+"insertBoard", param);
         }
     }
+
+    public void deleteBoard(Map param) {
+        System.out.println(param.toString());
+        sqlSession.delete(namespace+"deleteBoard", param);
+    }
 }
