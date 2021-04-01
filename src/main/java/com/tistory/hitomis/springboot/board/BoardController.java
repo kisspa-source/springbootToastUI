@@ -1,4 +1,4 @@
-package com.tistory.kisspa.springboot.board;
+package com.tistory.hitomis.springboot.board;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

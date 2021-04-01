@@ -1,4 +1,4 @@
-package com.tistory.kisspa.springboot;
+package com.tistory.hitomis.springboot;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

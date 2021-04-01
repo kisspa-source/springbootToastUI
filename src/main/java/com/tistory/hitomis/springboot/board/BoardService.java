@@ -1,4 +1,4 @@
-package com.tistory.kisspa.springboot.board;
+package com.tistory.hitomis.springboot.board;
 
 import org.apache.ibatis.session.SqlSession;
 import org.springframework.stereotype.Service;
