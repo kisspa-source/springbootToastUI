@@ -16,6 +16,9 @@
     <style>
         p { margin:15px 0px; }
         .h-div {height:96%; border:1px #000000 solid}
+        img {
+            max-width: 100%;
+        }
     </style>
 </head>
 <body>
@@ -28,40 +31,18 @@
                     <a class="nav-link active" data-toggle="tab" href="#gridTab">Grid</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" data-toggle="tab" href="#asd">ASD</a>
+                    <a class="nav-link" data-toggle="tab" href="#calendarTab">Calendar</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" data-toggle="tab" href="#zxc">ZXC</a>
                 </li>
             </ul>
             <div class="tab-content">
-
                 <div class="tab-pane fade show active" id="gridTab">
-                    <!-- 검색조건 -->
-                    <div class="form-inline">
-                        <div class="form-group mb-2">
-                            <input type="text" class="form-control form-control-sm" id="searchText"
-                                   placeholder="Search Text">
-                        </div>
-                        <div class="form-group mb-2">
-                            <button type="button" class="btn btn-outline-success my-2 my-sm-0" id="searchBtn">Search</button>
-                        </div>
-
-                    </div>
-                    <div class="form-inline" align="right">
-                        <!-- 생성버튼 -->
-                        <div align="right">
-                            <button type="button" class="btn btn-primary btn-sm" id="createBtn">Create</button>
-                        </div>
-                        <!-- 삭제버튼 -->
-                        <div align="right">
-                            <button type="button" class="btn btn-primary btn-sm" id="deleteBtn">Delete</button>
-                        </div>
-                    </div>
-
                     <!-- 상세화면 -->
                     <div class="collapse" id="collapseDetail">
-                        <div>
+                        <!-- 입력/수정 -->
+                        <div id="editMode" style="display: none">
                             <div class="form-group">
                                 <input type="hidden" id="boardId">
                                 <label for="inputTitle">Title</label>
@@ -72,11 +53,10 @@
                                 <input type="text" class="form-control" id="inputName" placeholder="Enter Name">
                             </div>
                             <div class="form-group">
-                                <!--<label for="inputContents">Contents</label>-->
-                                <div id="editor">
-                                    <!--<textarea class="form-control" id="inputContents" rows="3" placeholder="Enter Contents"></textarea>-->
-                                </div>
+                                <!-- 에디터 -->
+                                <div id="editor"></div>
                             </div>
+                            <!-- 하단버튼 -->
                             <div align="center" style="margin: 5px 0px">
                                 <button type="button" class="btn btn-primary" id="submitBtn">
                                     Submit
@@ -88,18 +68,56 @@
                                         aria-controls="collapseDetail">
                                     Cancel
                                 </button>
-
                             </div>
+                        </div>
+
+                        <!-- 보기 -->
+                        <div id="viewMode">
+                            <!-- view  -->
+                            <div id="editorView"></div>
                         </div>
                     </div>
 
-                    <!-- 목록 데이터 그리드 -->
+                    <!-- 목록-->
+                    <!-- 검색조건 -->
+
+                    <!-- 상단 버튼 -->
+                    <div align="right">
+                        <div class="form-inline">
+                            <div class="form-group mb-2">
+                                <input type="text" class="form-control form-control-sm" id="searchText"
+                                       placeholder="Search Text">
+                            </div>
+                            <div class="form-group mb-2">
+                                <button type="button" class="btn btn-outline-success my-2 my-sm-0" id="searchBtn">Search</button>
+                            </div>
+                            <div width="100%"></div>
+                            <!-- 생성버튼 -->
+                            <button type="button" class="btn btn-primary btn-sm" id="createBtn">Create</button>
+                            <!-- 삭제버튼 -->
+                            <button type="button" class="btn btn-primary btn-sm" id="deleteBtn">Delete</button>
+                        </div>
+
+                    </div>
+                    <!-- 데이터 그리드 -->
                     <div id="grid" class="h-div"></div>
 
                 </div>
 
-                <div class="tab-pane fade" id="asd">
-                    <p>Nunc vitae turpis id nibh sodales commodo et non augue. Proin fringilla ex nunc. Integer tincidunt risus ut facilisis tristique.</p>
+                <div class="tab-pane fade" id="calendarTab">
+                    <div id="menu">
+                        <span id="menu-navi">
+                            <button type="button" class="btn btn-default btn-sm move-today" data-action="move-today">Today</button>
+                            <button type="button" class="btn btn-default btn-sm move-day" data-action="move-prev">
+                                <i class="calendar-icon ic-arrow-line-left" data-action="move-prev"></i>
+                            </button>
+                            <button type="button" class="btn btn-default btn-sm move-day" data-action="move-next">
+                                <i class="calendar-icon ic-arrow-line-right" data-action="move-next"></i>
+                            </button>
+                        </span>
+                        <span id="renderRange" class="render-range"></span>
+                    </div>
+                    <div id="calendar"></div>
                 </div>
 
                 <div class="tab-pane fade" id="zxc">
@@ -120,6 +138,7 @@
 <script>
     let grid;
     let editor;
+    let calendar;
     window.onload = init();
     window.addEventListener('resize', resize);
 
@@ -128,6 +147,7 @@
     const submitBtn = document.getElementById('submitBtn');
     const createBtn = document.getElementById('createBtn');
     const deleteBtn = document.getElementById('deleteBtn');
+    const editorView = document.getElementById('editorView');
 
     searchText.addEventListener('keydown', () => {
         if(event.key === 'Enter') getDataList();
@@ -143,6 +163,8 @@
     createBtn.addEventListener('click', () => {
         setDetailData(new Object());
         $('#collapseDetail').collapse('show');
+        $('#editMode').css('display', 'block');
+        $('#viewMode').css('display', 'none');
     });
 
     deleteBtn.addEventListener('click', () => {
@@ -227,9 +249,13 @@
         $('#boardId').val(data.BOARD_ID);
         $('#inputTitle').val(data.TITLE);
         $('#inputName').val(data.WRITER);
-        editor.setHtml(data.CONTENTS);
+        //editor.setHtml(data.CONTENTS);
+        editorView.innerHTML = data.CONTENTS;
 
         $('#collapseDetail').collapse('show');
+        $(window).scrollTop(0);
+        $('#editMode').css('display', 'none');
+        $('#viewMode').css('display', 'block');
     }
 
     function getDataList() {
@@ -257,6 +283,13 @@
     function init() {
         createGrid();
         createEditor();
+        createCalendar();
+    }
+
+    function createCalendar() {
+        /*calendar = new tui.Calendar('#calendar', {
+            defaultView: 'month' // monthly view option
+        });*/
     }
 
     function createEditor() {
